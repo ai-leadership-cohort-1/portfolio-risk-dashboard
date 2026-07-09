@@ -1,12 +1,7 @@
-import { AssessmentInput, AssessmentMeta, Band, ScoringResult } from "@/lib/types";
+import { AssessmentInput, AssessmentMeta, ScoringResult } from "@/lib/types";
 import { formatAbn } from "@/lib/validation";
 import TrafficLight from "@/components/TrafficLight";
-
-const BAND_BADGE: Record<Band, string> = {
-  strong: "bg-emerald-100 text-emerald-800 border-emerald-300",
-  moderate: "bg-amber-100 text-amber-800 border-amber-300",
-  weak: "bg-red-100 text-red-800 border-red-300",
-};
+import { BAND_BADGE_CLASSES } from "@/components/bandStyles";
 
 export default function CreditSummary({
   input,
@@ -70,7 +65,7 @@ export default function CreditSummary({
               </div>
               <div className="sm:w-1/6">
                 <span
-                  className={`inline-block rounded-full border px-2 py-0.5 text-xs font-medium capitalize ${BAND_BADGE[factor.band]}`}
+                  className={`inline-block rounded-full border px-2 py-0.5 text-xs font-medium capitalize ${BAND_BADGE_CLASSES[factor.band]}`}
                 >
                   {factor.band}
                 </span>
