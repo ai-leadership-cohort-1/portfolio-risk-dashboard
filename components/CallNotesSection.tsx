@@ -58,7 +58,7 @@ export default function CallNotesSection({
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className="print:hidden flex items-center gap-2 text-sm font-semibold text-foreground"
+          className="print:hidden flex items-center gap-2 rounded text-sm font-semibold text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           aria-expanded={open}
         >
           <span aria-hidden="true">{open ? "▾" : "▸"}</span>
@@ -70,7 +70,7 @@ export default function CallNotesSection({
         <button
           type="button"
           onClick={handleCopy}
-          className="print:hidden rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground shadow-sm hover:bg-border/40"
+          className="print:hidden rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground shadow-sm hover:bg-border/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
         >
           {copied ? "Copied" : "Copy to clipboard"}
         </button>

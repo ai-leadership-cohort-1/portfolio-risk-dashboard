@@ -77,7 +77,7 @@ export default function ResultTile({ row }: { row: BatchRow }) {
         <button
           type="button"
           onClick={() => setExpanded((e) => !e)}
-          className="print:hidden text-xs font-medium text-accent hover:underline"
+          className="print:hidden rounded text-xs font-medium text-accent hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
         >
           {expanded ? "Hide full summary" : "View full summary"}
         </button>

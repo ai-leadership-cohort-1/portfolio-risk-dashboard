@@ -31,7 +31,7 @@ export default function TopNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`rounded px-3 py-1.5 text-sm font-medium transition-colors ${
+                className={`rounded px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${
                   active
                     ? "bg-accent text-accent-foreground"
                     : "text-muted hover:text-foreground"
