@@ -11,9 +11,9 @@
   --foreground: #14181f;
   --muted: #5b6472;
   --border: #e1e4e9;
-  --accent: #8a2c2c; /* single accent: muted brick red (deliberately darker/
-    less saturated than the traffic-light "Red" band so a Red risk result
-    still reads as a distinct, more alarming colour) */
+  --accent: #b8336a; /* single accent: deep rose/pink (kept muted rather than
+    a bright pink to stay in line with the "calm, restrained" brief, and
+    still distinct from the traffic-light "Red" band) */
   --accent-foreground: #ffffff;
 }
 
