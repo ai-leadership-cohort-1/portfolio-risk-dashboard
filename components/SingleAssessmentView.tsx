@@ -3,6 +3,7 @@
 import { useState } from "react";
 import AssessmentForm from "@/components/AssessmentForm";
 import CreditSummary from "@/components/CreditSummary";
+import CallNotesSection from "@/components/CallNotesSection";
 import {
   RawAssessmentRecord,
   AssessmentInput,
@@ -79,6 +80,7 @@ export default function SingleAssessmentView() {
       {validated && result && meta && (
         <div className="mt-8">
           <CreditSummary input={validated} result={result} meta={meta} />
+          <CallNotesSection input={validated} result={result} />
         </div>
       )}
     </div>
