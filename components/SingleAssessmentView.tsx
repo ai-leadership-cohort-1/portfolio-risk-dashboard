@@ -2,9 +2,16 @@
 
 import { useState } from "react";
 import AssessmentForm from "@/components/AssessmentForm";
-import { RawAssessmentRecord, AssessmentInput, ScoringResult } from "@/lib/types";
+import CreditSummary from "@/components/CreditSummary";
+import {
+  RawAssessmentRecord,
+  AssessmentInput,
+  ScoringResult,
+  AssessmentMeta,
+} from "@/lib/types";
 import { FieldErrors, validateAssessmentRecord } from "@/lib/validation";
 import { computeScore } from "@/lib/scoring";
+import { generateAssessmentId, formatTimestamp } from "@/lib/id";
 
 const EMPTY_VALUES: RawAssessmentRecord = {
   business_name: "",
@@ -24,6 +31,7 @@ export default function SingleAssessmentView() {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [validated, setValidated] = useState<AssessmentInput | null>(null);
   const [result, setResult] = useState<ScoringResult | null>(null);
+  const [meta, setMeta] = useState<AssessmentMeta | null>(null);
 
   function handleChange(field: keyof RawAssessmentRecord, value: string) {
     setValues((prev) => ({ ...prev, [field]: value }));
@@ -33,13 +41,23 @@ export default function SingleAssessmentView() {
     e.preventDefault();
     const outcome = validateAssessmentRecord(values);
     setErrors(outcome.fieldErrors);
-    setValidated(outcome.input);
-    setResult(outcome.input ? computeScore(outcome.input) : null);
+    if (outcome.input) {
+      setValidated(outcome.input);
+      setResult(computeScore(outcome.input));
+      setMeta({
+        assessmentId: generateAssessmentId(),
+        timestamp: formatTimestamp(new Date()),
+      });
+    } else {
+      setValidated(null);
+      setResult(null);
+      setMeta(null);
+    }
   }
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-10">
-      <div className="mb-8">
+      <div className="print:hidden mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           Single Assessment
         </h1>
@@ -49,7 +67,7 @@ export default function SingleAssessmentView() {
         </p>
       </div>
 
-      <div className="rounded-lg border border-border bg-surface p-6">
+      <div className="print:hidden rounded-lg border border-border bg-surface p-6">
         <AssessmentForm
           values={values}
           errors={errors}
@@ -58,16 +76,9 @@ export default function SingleAssessmentView() {
         />
       </div>
 
-      {validated && result && (
-        <div className="mt-8 rounded-lg border border-border bg-surface p-6">
-          <p className="text-sm font-medium text-foreground">
-            Scoring result:{" "}
-            <span className="font-semibold">{result.overall}</span>. A
-            polished credit summary layout is coming in the next milestone.
-          </p>
-          <pre className="mt-3 overflow-x-auto rounded bg-background p-3 text-xs text-muted">
-            {JSON.stringify(result, null, 2)}
-          </pre>
+      {validated && result && meta && (
+        <div className="mt-8">
+          <CreditSummary input={validated} result={result} meta={meta} />
         </div>
       )}
     </div>
