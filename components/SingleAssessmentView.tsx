@@ -13,6 +13,7 @@ import {
 import { FieldErrors, validateAssessmentRecord } from "@/lib/validation";
 import { computeScore } from "@/lib/scoring";
 import { generateAssessmentId, formatTimestamp } from "@/lib/id";
+import { SAMPLE_SCENARIOS, SampleScenarioKey } from "@/lib/sampleData";
 
 const EMPTY_VALUES: RawAssessmentRecord = {
   business_name: "",
@@ -36,6 +37,14 @@ export default function SingleAssessmentView() {
 
   function handleChange(field: keyof RawAssessmentRecord, value: string) {
     setValues((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function handleLoadSample(key: SampleScenarioKey) {
+    setValues(SAMPLE_SCENARIOS[key]);
+    setErrors({});
+    setValidated(null);
+    setResult(null);
+    setMeta(null);
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -66,6 +75,26 @@ export default function SingleAssessmentView() {
           Enter the application details below to generate an instant
           pre-screening summary.
         </p>
+      </div>
+
+      <div className="print:hidden mb-6 flex flex-wrap items-center gap-3">
+        <span className="text-xs font-medium text-muted">Load sample:</span>
+        {(Object.keys(SAMPLE_SCENARIOS) as SampleScenarioKey[]).map((key) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => handleLoadSample(key)}
+            className="flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-medium text-foreground shadow-sm hover:bg-border/40"
+          >
+            <span
+              className={`h-2.5 w-2.5 rounded-full ${
+                key === "Green" ? "bg-emerald-600" : key === "Amber" ? "bg-amber-500" : "bg-red-600"
+              }`}
+              aria-hidden="true"
+            />
+            {key}
+          </button>
+        ))}
       </div>
 
       <div className="print:hidden rounded-lg border border-border bg-surface p-6">
