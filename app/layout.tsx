@@ -18,9 +18,11 @@ export default function RootLayout({
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <AppDataProvider>
-          <TopNav />
+          <div className="no-print">
+            <TopNav />
+          </div>
           <main className="flex-1">{children}</main>
-          <footer className="border-t border-border bg-surface px-4 py-4 text-center text-xs text-muted sm:px-6">
+          <footer className="no-print border-t border-border bg-surface px-4 py-4 text-center text-xs text-muted sm:px-6">
             Internal prototype for portfolio risk pre-screening only. Not a credit
             decision. All data stays in your browser session and is never uploaded
             or stored.

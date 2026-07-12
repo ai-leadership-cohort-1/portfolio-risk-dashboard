@@ -170,4 +170,56 @@ export function formatAud(value: number): string {
   }).format(value);
 }
 
+export interface PortfolioHealth {
+  rating: "Sound" | "Watch" | "Elevated Risk";
+  description: string;
+}
+
+/**
+ * A simple, transparent heuristic for the board-level health verdict.
+ * Combines Red exposure share and industry concentration — adjust the
+ * thresholds below if the committee wants a stricter or looser bar.
+ */
+export function assessPortfolioHealth(
+  categories: CategorySummary[],
+  sectors: SectorSummary[]
+): PortfolioHealth {
+  const red = categories.find((c) => c.category === "Red")!;
+  const amber = categories.find((c) => c.category === "Amber")!;
+  const maxSectorShare = sectors.length ? Math.max(...sectors.map((s) => s.sharePct)) : 0;
+
+  if (red.sharePct >= 20 || maxSectorShare >= 35) {
+    return {
+      rating: "Elevated Risk",
+      description: `Red-rated exposure (${red.sharePct.toFixed(
+        1
+      )}% of the book) and/or industry concentration (${maxSectorShare.toFixed(
+        1
+      )}% in the largest sector) are outside comfortable tolerances. Recommend Credit Committee review before further origination in the affected segments.`,
+    };
+  }
+
+  if (red.sharePct >= 8 || amber.sharePct >= 35 || maxSectorShare >= 25) {
+    return {
+      rating: "Watch",
+      description: `The portfolio is broadly sound but carries pockets of elevated risk — either in Red-rated exposure (${red.sharePct.toFixed(
+        1
+      )}%), Amber exposure (${amber.sharePct.toFixed(
+        1
+      )}%), or sector concentration (${maxSectorShare.toFixed(
+        1
+      )}% in the largest sector). Recommend continued monthly monitoring of the accounts and sectors flagged below.`,
+    };
+  }
+
+  return {
+    rating: "Sound",
+    description: `Risk exposure is well distributed with Red-rated accounts at only ${red.sharePct.toFixed(
+      1
+    )}% of the book and no single industry sector exceeding ${maxSectorShare.toFixed(
+      1
+    )}% of exposure. Standard quarterly monitoring is sufficient.`,
+  };
+}
+
 export { GREEN_MAX, AMBER_MAX };

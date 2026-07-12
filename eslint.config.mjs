@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // This project's own additions:
+    "public/**",
+    "micro-branch-simulator/**",
   ]),
 ]);
 
