@@ -1,102 +1,65 @@
-/**
- * Shared domain types for the loan pre-screening prototype.
- * Everything here is plain data — no client/server split, no persistence.
- */
+// Core domain types for the Portfolio Risk Dashboard prototype.
+// Everything here is in-memory only — nothing is persisted to disk or a database.
 
-export const INDUSTRIES = [
-  "Construction",
-  "Hospitality & Food",
-  "Retail Trade",
-  "Professional Services",
-  "Healthcare",
-  "Manufacturing",
-  "Transport & Logistics",
-  "Agriculture",
-  "Other",
-] as const;
-export type Industry = (typeof INDUSTRIES)[number];
+export type RepaymentStatus =
+  | "current"
+  | "30_days"
+  | "60_days"
+  | "90_plus_days"
+  | "default";
 
-export const LOAN_PURPOSES = [
-  "Working capital",
-  "Equipment finance",
-  "Business expansion",
-  "Refinance existing debt",
-  "Property/fit-out",
-  "Other",
-] as const;
-export type LoanPurpose = (typeof LOAN_PURPOSES)[number];
+export const REPAYMENT_STATUS_LABELS: Record<RepaymentStatus, string> = {
+  current: "Current",
+  "30_days": "30 days in arrears",
+  "60_days": "60 days in arrears",
+  "90_plus_days": "90+ days in arrears",
+  default: "Default",
+};
 
-/** Raw, string-typed record shape — matches the CSV template headers 1:1,
- * and is what both the single-assessment form and the batch CSV parser
- * produce before validation/parsing. Keeping this shape shared means the
- * exact same validation function can be reused for both entry points. */
-export interface RawAssessmentRecord {
-  business_name: string;
-  abn: string;
-  industry: string;
-  years_in_operation: string;
-  annual_revenue_aud: string;
-  existing_debt_aud: string;
-  loan_amount_aud: string;
-  loan_purpose: string;
-  purpose_detail: string;
-  rm_name: string;
+export type RiskCategory = "Green" | "Amber" | "Red";
+
+/** A single customer / loan record as parsed from the uploaded portfolio CSV. */
+export interface Customer {
+  id: string;
+  name: string;
+  industrySector: string;
+  state?: string;
+  /** Australian-style credit score, 0-1000 (higher = better). */
+  creditScore: number;
+  repaymentStatus: RepaymentStatus;
+  /** Outstanding loan balance / exposure, in AUD. */
+  loanBalance: number;
+  loanType?: string;
 }
 
-export const RAW_FIELD_ORDER: (keyof RawAssessmentRecord)[] = [
-  "business_name",
-  "abn",
-  "industry",
-  "years_in_operation",
-  "annual_revenue_aud",
-  "existing_debt_aud",
-  "loan_amount_aud",
-  "loan_purpose",
-  "purpose_detail",
-  "rm_name",
-];
-
-/** Parsed, typed, validated assessment input — ready to score. */
-export interface AssessmentInput {
-  businessName: string;
-  abn: string; // normalised to 11 digits, no spaces
-  industry: Industry;
-  yearsInOperation: number;
-  annualRevenueAud: number;
-  existingDebtAud: number;
-  loanAmountAud: number;
-  loanPurpose: LoanPurpose;
-  purposeDetail: string;
-  rmName: string;
+/** A customer record after the scoring engine has run. */
+export interface ScoredCustomer extends Customer {
+  creditRiskFactor: number; // 0-100, higher = riskier
+  repaymentRiskFactor: number; // 0-100, higher = riskier
+  exposureFactor: number; // 0-100, higher = riskier
+  riskScore: number; // 0-100 weighted composite
+  riskCategory: RiskCategory;
 }
 
-export type Band = "strong" | "moderate" | "weak";
-export type TrafficLight = "Green" | "Amber" | "Red";
-
-export interface FactorResult {
-  key: "leverage" | "coverage" | "vintage" | "industryRisk" | "purposeRisk";
-  label: string;
-  value: string;
-  band: Band;
-  interpretation: string;
+/** A lending/risk rule extracted from the uploaded policy PDF. */
+export interface PolicyRule {
+  id: string;
+  keyword: string;
+  text: string;
 }
 
-export interface ScoringResult {
-  factors: FactorResult[];
-  overall: TrafficLight;
-  riskFlags: string[];
-  recommendation: string;
+export interface PolicyDocument {
+  fileName: string;
+  pageCount: number;
+  rawText: string;
+  rules: PolicyRule[];
 }
 
-export interface AssessmentMeta {
-  assessmentId: string;
-  timestamp: string; // ISO string, formatted for display at render time
-}
-
-export interface CallNotes {
-  openingLine: string;
-  talkingPoints: string[];
-  questions: string[];
-  nextStep: string;
-  disclaimer: string;
+export interface PortfolioDataset {
+  fileName: string;
+  customers: Customer[];
+  /** Column names that were present but not recognised, surfaced for transparency. */
+  unrecognisedColumns: string[];
+  /** Rows skipped due to missing/invalid required fields. */
+  skippedRows: number;
 }

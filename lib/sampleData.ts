@@ -1,57 +1,112 @@
-import { RawAssessmentRecord } from "./types";
+import { Customer, RepaymentStatus } from "./types";
 
-/**
- * Sample scenarios for the "Load sample" buttons on the Single Assessment
- * form. Chosen to land cleanly on Green / Amber / Red once run through
- * lib/scoring.ts (see the comments below each one).
- */
+// Deterministic PRNG (mulberry32) so the "Load sample data" demo is stable
+// across reloads instead of reshuffling every time.
+function mulberry32(seed: number) {
+  return function () {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
-// All strong factors: established business, modest ask well within coverage.
-const SAMPLE_GREEN: RawAssessmentRecord = {
-  business_name: "Green Valley Advisory Pty Ltd",
-  abn: "12345678901",
-  industry: "Professional Services",
-  years_in_operation: "7",
-  annual_revenue_aud: "1200000",
-  existing_debt_aud: "150000",
-  loan_amount_aud: "150000",
-  loan_purpose: "Working capital",
-  purpose_detail: "Smooth out seasonal cashflow between large client invoices",
-  rm_name: "Alex Morgan",
-};
+const SECTORS = [
+  { name: "Construction", weight: 6, riskTilt: 0.7 },
+  { name: "Retail Trade", weight: 6, riskTilt: 0.4 },
+  { name: "Hospitality", weight: 5, riskTilt: 0.65 },
+  { name: "Professional Services", weight: 5, riskTilt: 0.15 },
+  { name: "Manufacturing", weight: 4, riskTilt: 0.35 },
+  { name: "Agriculture", weight: 4, riskTilt: 0.5 },
+  { name: "Transport & Logistics", weight: 3, riskTilt: 0.45 },
+  { name: "Health Care", weight: 3, riskTilt: 0.1 },
+  { name: "Wholesale Trade", weight: 2, riskTilt: 0.3 },
+  { name: "Accommodation & Food Services", weight: 2, riskTilt: 0.55 },
+];
 
-// One weak factor (industry) plus moderate leverage/coverage/vintage -> Amber.
-const SAMPLE_AMBER: RawAssessmentRecord = {
-  business_name: "Sunset Harbour Kitchen",
-  abn: "23456789012",
-  industry: "Hospitality & Food",
-  years_in_operation: "3",
-  annual_revenue_aud: "600000",
-  existing_debt_aud: "180000",
-  loan_amount_aud: "200000",
-  loan_purpose: "Equipment finance",
-  purpose_detail: "New commercial kitchen equipment to expand dinner service",
-  rm_name: "Jordan Lee",
-};
+const STATES = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"];
 
-// Four weak factors (leverage, coverage, vintage, industry) -> Red.
-const SAMPLE_RED: RawAssessmentRecord = {
-  business_name: "Precision Formwork Solutions",
-  abn: "34567890123",
-  industry: "Construction",
-  years_in_operation: "1.5",
-  annual_revenue_aud: "500000",
-  existing_debt_aud: "250000",
-  loan_amount_aud: "480000",
-  loan_purpose: "Refinance existing debt",
-  purpose_detail: "Consolidate short-term supplier and equipment finance debt",
-  rm_name: "Casey Nguyen",
-};
+const NAME_PREFIXES = [
+  "Summit", "Harbour", "Ridgeline", "Coastal", "Ironbark", "Meridian", "Outback",
+  "Bluegum", "Riverside", "Northgate", "Southern Cross", "Golden Acre", "Redwood",
+  "Silverline", "Anchor", "Firstlight", "Everview", "Greenfield", "Cobalt", "Union",
+  "Parkside", "Wattle", "Highland", "Sundown", "Fairway", "Truewest", "Kestrel",
+  "Amber", "Vantage", "Cedar", "Marlin", "Basecamp", "Corsair", "Hillcrest",
+  "Lantern", "Boldwood", "Pinnacle", "Estuary", "Windward", "Overland",
+];
 
-export const SAMPLE_SCENARIOS = {
-  Green: SAMPLE_GREEN,
-  Amber: SAMPLE_AMBER,
-  Red: SAMPLE_RED,
-} as const;
+const NAME_SUFFIXES = [
+  "Pty Ltd", "Group", "& Co", "Trading", "Holdings", "Services", "Co-op",
+];
 
-export type SampleScenarioKey = keyof typeof SAMPLE_SCENARIOS;
+function pickWeighted<T extends { weight: number }>(items: T[], rnd: () => number): T {
+  const total = items.reduce((sum, i) => sum + i.weight, 0);
+  let r = rnd() * total;
+  for (const item of items) {
+    if (r < item.weight) return item;
+    r -= item.weight;
+  }
+  return items[items.length - 1];
+}
+
+function repaymentStatusFor(riskTilt: number, rnd: () => number): RepaymentStatus {
+  const r = rnd();
+  const t = riskTilt; // 0 (low risk sector) - 1 (high risk sector)
+  if (r < 0.72 - 0.3 * t) return "current";
+  if (r < 0.86 - 0.15 * t) return "30_days";
+  if (r < 0.94 - 0.05 * t) return "60_days";
+  if (r < 0.98) return "90_plus_days";
+  return "default";
+}
+
+export function generateSampleCustomers(count = 40): Customer[] {
+  const rnd = mulberry32(42);
+  const customers: Customer[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const sector = pickWeighted(SECTORS, rnd);
+    const status = repaymentStatusFor(sector.riskTilt, rnd);
+
+    // Credit score correlates loosely with repayment status and sector risk tilt.
+    const statusPenalty: Record<RepaymentStatus, number> = {
+      current: 0,
+      "30_days": 60,
+      "60_days": 130,
+      "90_plus_days": 220,
+      default: 300,
+    };
+    const baseScore = 880 - sector.riskTilt * 180 - statusPenalty[status];
+    const creditScore = Math.max(300, Math.min(980, Math.round(baseScore + (rnd() - 0.5) * 120)));
+
+    // Loan balance: mostly modest small-business facilities with a long tail
+    // of larger exposures (a handful of construction/agri names get big).
+    const sizeRoll = rnd();
+    let loanBalance: number;
+    if (sizeRoll > 0.93) {
+      loanBalance = Math.round((650_000 + rnd() * 700_000) / 1000) * 1000;
+    } else if (sizeRoll > 0.7) {
+      loanBalance = Math.round((250_000 + rnd() * 350_000) / 1000) * 1000;
+    } else {
+      loanBalance = Math.round((20_000 + rnd() * 200_000) / 1000) * 1000;
+    }
+
+    const prefix = NAME_PREFIXES[i % NAME_PREFIXES.length];
+    const suffix = NAME_SUFFIXES[Math.floor(rnd() * NAME_SUFFIXES.length)];
+
+    customers.push({
+      id: `CUST-${String(i + 1).padStart(3, "0")}`,
+      name: `${prefix} ${suffix}`,
+      industrySector: sector.name,
+      state: STATES[Math.floor(rnd() * STATES.length)],
+      creditScore,
+      repaymentStatus: status,
+      loanBalance,
+      loanType: rnd() > 0.5 ? "Term Loan" : "Overdraft",
+    });
+  }
+
+  return customers;
+}
+
+export const SAMPLE_CUSTOMERS = generateSampleCustomers();

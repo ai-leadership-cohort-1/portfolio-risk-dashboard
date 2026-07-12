@@ -2,45 +2,67 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAppData } from "./AppDataProvider";
 
-const NAV_ITEMS = [
-  { href: "/", label: "Single Assessment" },
-  { href: "/batch", label: "Batch Review" },
-] as const;
+const LINKS = [
+  { href: "/", label: "Upload" },
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/summary", label: "Executive Summary" },
+];
 
-/**
- * Top navigation bar. Hidden on print (the printed page should only ever
- * show the credit summary / call notes, never app chrome).
- */
 export default function TopNav() {
   const pathname = usePathname();
+  const { hasData, reset } = useAppData();
 
   return (
-    <header className="print:hidden border-b border-border bg-surface">
-      <div className="mx-auto flex max-w-5xl flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm font-semibold tracking-tight text-foreground">
-            Small Business Loan Pre-Screening
-          </p>
-          <p className="text-xs text-muted">Internal prototype &middot; not a credit decision</p>
-        </div>
-        <nav className="flex gap-1 rounded-md border border-border bg-background p-1">
-          {NAV_ITEMS.map((item) => {
-            const active = pathname === item.href;
+    <header className="border-b border-border bg-surface">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <Link href="/" className="flex items-center gap-2">
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-sm bg-accent text-sm font-bold text-accent-foreground">
+            N
+          </span>
+          <span className="text-sm font-semibold tracking-tight text-foreground sm:text-base">
+            Portfolio Risk Dashboard
+          </span>
+        </Link>
+
+        <nav className="flex items-center gap-1 sm:gap-2">
+          {LINKS.map((link) => {
+            const disabled = link.href !== "/" && !hasData;
+            const active = pathname === link.href;
+            if (disabled) {
+              return (
+                <span
+                  key={link.href}
+                  title="Upload portfolio data first"
+                  className="cursor-not-allowed rounded-md px-2.5 py-1.5 text-xs font-medium text-muted/50 sm:text-sm"
+                >
+                  {link.label}
+                </span>
+              );
+            }
             return (
               <Link
-                key={item.href}
-                href={item.href}
-                className={`rounded px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${
+                key={link.href}
+                href={link.href}
+                className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors sm:text-sm ${
                   active
                     ? "bg-accent text-accent-foreground"
-                    : "text-muted hover:text-foreground"
+                    : "text-foreground/80 hover:bg-background hover:text-foreground"
                 }`}
               >
-                {item.label}
+                {link.label}
               </Link>
             );
           })}
+          {hasData && (
+            <button
+              onClick={reset}
+              className="ml-1 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-muted hover:bg-background sm:text-sm"
+            >
+              Reset
+            </button>
+          )}
         </nav>
       </div>
     </header>

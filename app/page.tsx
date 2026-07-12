@@ -1,5 +1,5 @@
-import SingleAssessmentView from "@/components/SingleAssessmentView";
+import UploadSection from "@/components/UploadSection";
 
 export default function Home() {
-  return <SingleAssessmentView />;
+  return <UploadSection />;
 }

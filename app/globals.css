@@ -6,15 +6,19 @@
  * defined separately per band (see components) for high contrast.
  */
 :root {
-  --background: #f7f8f9;
+  --background: #f7f7f6;
   --surface: #ffffff;
-  --foreground: #14181f;
-  --muted: #5b6472;
-  --border: #e1e4e9;
-  --accent: #b8336a; /* single accent: deep rose/pink (kept muted rather than
-    a bright pink to stay in line with the "calm, restrained" brief, and
-    still distinct from the traffic-light "Red" band) */
+  --foreground: #1a1a1a;
+  --muted: #5c5c5c;
+  --border: #e2e0dc;
+  --accent: #c8102e; /* restrained NAB-style deep red — no NAB Design Guide
+    skill/asset was found in this session, so this is a reasonable stand-in
+    based on NAB's known public brand colour, kept deliberately muted rather
+    than saturated to match the "calm, restrained banking aesthetic" brief. */
   --accent-foreground: #ffffff;
+  --green: #15803d;
+  --amber: #b45309;
+  --red: #b91c1c;
 }
 
 @theme inline {
@@ -25,6 +29,9 @@
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-green: var(--green);
+  --color-amber: var(--amber);
+  --color-red: var(--red);
   --font-sans: "Helvetica Neue", Arial, ui-sans-serif, system-ui, sans-serif;
 }
 
