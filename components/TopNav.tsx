@@ -16,6 +16,7 @@ export default function TopNav() {
 
   return (
     <header className="border-b border-border bg-surface">
+      <div className="h-1 bg-accent" aria-hidden="true" />
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
           <span className="inline-flex h-7 w-7 items-center justify-center rounded-sm bg-accent text-sm font-bold text-accent-foreground">
