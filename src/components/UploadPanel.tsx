@@ -55,10 +55,20 @@ export default function UploadPanel() {
 
       let rules: { text: string }[] = [];
       let pdfPageCount: number | null = null;
+      let pdfParseFailed = false;
+      // PDF is optional and its extraction is a best-effort heuristic — a
+      // parsing failure (e.g. an older browser missing Promise.withResolvers,
+      // a scanned/image-only PDF, or a corrupt file) must never block the
+      // CSV analysis from completing.
       if (pdfFile) {
-        const pdfResult = await parseLendingPolicyPdf(pdfFile);
-        rules = pdfResult.rules;
-        pdfPageCount = pdfResult.pageCount;
+        try {
+          const pdfResult = await parseLendingPolicyPdf(pdfFile);
+          rules = pdfResult.rules;
+          pdfPageCount = pdfResult.pageCount;
+        } catch (pdfError) {
+          console.warn("PDF parsing failed; continuing analysis without extracted policy rules.", pdfError);
+          pdfParseFailed = true;
+        }
       }
 
       if (rowsSkipped > 0) {
@@ -72,6 +82,7 @@ export default function UploadPanel() {
         csvFileName: csvFile.name,
         pdfFileName: pdfFile ? pdfFile.name : null,
         pdfPageCount,
+        pdfParseFailed,
         analysedAt: new Date(),
         isSampleData: isSampleSelected,
       });

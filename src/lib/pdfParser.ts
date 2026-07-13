@@ -1,5 +1,28 @@
 import { ExtractedRule, PdfParseResult } from "./types";
 
+// pdfjs-dist v6 relies internally on Promise.withResolvers (a very recent
+// addition to JS: Safari 17.4+, Chrome 119+, Firefox 121+). On older
+// browsers/webviews this is undefined, which surfaces to the user as a
+// cryptic "undefined is not a function" error the moment a PDF is parsed.
+// Polyfill it defensively so PDF extraction keeps working everywhere; this
+// only ever runs client-side since pdfParser.ts is only imported from a
+// "use client" component's event handler.
+if (typeof Promise.withResolvers !== "function") {
+  Promise.withResolvers = function <T>(): {
+    promise: Promise<T>;
+    resolve: (value: T | PromiseLike<T>) => void;
+    reject: (reason?: unknown) => void;
+  } {
+    let resolve!: (value: T | PromiseLike<T>) => void;
+    let reject!: (reason?: unknown) => void;
+    const promise = new Promise<T>((res, rej) => {
+      resolve = res;
+      reject = rej;
+    });
+    return { promise, resolve, reject };
+  };
+}
+
 // Keyword heuristics only — no LLM/API calls of any kind. Pure client-side
 // text extraction + sentence splitting + keyword flagging.
 const RULE_KEYWORDS = [

@@ -48,6 +48,7 @@ export interface AnalysisResult {
   csvFileName: string;
   pdfFileName: string | null;
   pdfPageCount: number | null;
+  pdfParseFailed: boolean;
   analysedAt: Date;
   isSampleData: boolean;
 }

@@ -100,7 +100,7 @@ export default function DashboardPage() {
     );
   }
 
-  const { customers, rules, csvFileName, pdfFileName, pdfPageCount, analysedAt, isSampleData } = result;
+  const { customers, rules, csvFileName, pdfFileName, pdfPageCount, pdfParseFailed, analysedAt, isSampleData } = result;
 
   const categories = summariseByCategory(customers);
   const exposure = totalExposure(customers);
@@ -310,7 +310,13 @@ export default function DashboardPage() {
           <h3 className="mt-4 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
             Extracted Policy Highlights
           </h3>
-          {pdfFileName ? (
+          {pdfFileName && pdfParseFailed ? (
+            <p className="mt-1 text-sm text-[var(--muted)]">
+              Could not extract text from {pdfFileName} (it may be scanned/image-only, or the
+              browser blocked processing it) — the analysis proceeded without extracted policy
+              rules.
+            </p>
+          ) : pdfFileName ? (
             <>
               <p className="mt-1 text-xs text-[var(--muted)]">
                 Heuristic extraction from {pdfFileName} — {pdfPageCount} page(s) scanned.
