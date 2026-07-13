@@ -4,5 +4,4 @@ node_modules
 .next
 out
 *.local
-micro-branch-simulator/
 *.tsbuildinfo
