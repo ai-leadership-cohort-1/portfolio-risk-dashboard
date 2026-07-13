@@ -1,7 +1,0 @@
-config.txt
-.DS_Store
-node_modules
-.next
-out
-*.local
-*.tsbuildinfo
