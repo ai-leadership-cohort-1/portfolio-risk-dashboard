@@ -62,10 +62,13 @@ export interface TrendPoint {
 }
 
 /**
- * Seeded pseudo-random walk that tapers into the real current average
+ * Seeded pseudo-random walk that lands on the real current average
  * portfolio risk score at the most recent point, giving an illustrative
  * "trend leading up to today" without fabricating a false historical
- * record.
+ * record. Amplitude is deliberately generous (wide per-step swings plus
+ * an occasional larger "shock" step) so the line reads as a genuine
+ * trend rather than a flat approach into today's value — only the final
+ * one or two points taper in to avoid an abrupt jump at "Today".
  */
 export function generatePortfolioTrend(customers: ScoredCustomer[], points = 12): TrendPoint[] {
   const currentAverage =
@@ -85,19 +88,34 @@ export function generatePortfolioTrend(customers: ScoredCustomer[], points = 12)
   }
 
   const trend: TrendPoint[] = [];
-  let value = Math.max(5, Math.min(95, currentAverage + (next() - 0.5) * 20));
+  let value = Math.max(5, Math.min(95, currentAverage + (next() - 0.5) * 36));
+
+  // Only the last couple of points blend toward the real current average,
+  // so most of the line is free to swing rather than steadily flattening.
+  const taperPoints = Math.min(2, points - 1);
 
   for (let i = 0; i < points; i++) {
-    const progress = i / (points - 1);
-    const drift = (next() - 0.5) * 8 * (1 - progress);
-    value = value + drift;
-    // Taper toward the real current average as we approach "today".
-    value = value * (1 - progress * 0.4) + currentAverage * (progress * 0.4);
-    value = Math.max(0, Math.min(100, value));
+    const stepsFromEnd = points - 1 - i;
+
+    if (i > 0) {
+      // Occasional larger "shock" step alongside regular swings keeps the
+      // walk from looking uniformly wavy.
+      const isShock = next() < 0.2;
+      const amplitude = isShock ? 30 : 16;
+      const drift = (next() - 0.5) * amplitude;
+      value = value + drift;
+      value = Math.max(0, Math.min(100, value));
+    }
+
+    let displayValue = value;
+    if (stepsFromEnd < taperPoints) {
+      const taperWeight = 1 - stepsFromEnd / taperPoints; // closer to "today" = closer to 1
+      displayValue = value * (1 - taperWeight) + currentAverage * taperWeight;
+    }
 
     trend.push({
-      label: i === points - 1 ? "Today" : `T-${points - 1 - i}`,
-      averageRiskScore: Math.round((i === points - 1 ? currentAverage : value) * 10) / 10,
+      label: i === points - 1 ? "Today" : `T-${stepsFromEnd}`,
+      averageRiskScore: Math.round((i === points - 1 ? currentAverage : displayValue) * 10) / 10,
     });
   }
 
