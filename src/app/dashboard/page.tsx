@@ -10,6 +10,8 @@ import {
   topRiskCustomers,
   generatePortfolioTrend,
   recommendedActions,
+  sectorTrends,
+  sectorTrendInsights,
 } from "@/lib/aggregations";
 import { RISK_THRESHOLDS, DEFAULT_WEIGHTS } from "@/lib/riskScoring";
 import {
@@ -113,6 +115,8 @@ export default function DashboardPage() {
   const top10 = topRiskCustomers(customers, 10);
   const trend = generatePortfolioTrend(customers);
   const actions = recommendedActions(customers);
+  const sectors = sectorTrends(customers);
+  const sectorInsights = sectorTrendInsights(customers);
 
   const barData = summaries.map((s) => ({
     category: s.category,
@@ -236,6 +240,55 @@ export default function DashboardPage() {
               </PieChart>
             </ResponsiveContainer>
           </div>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+        <h3 className="text-sm font-semibold">Key Emerging Trends by Sector</h3>
+        <p className="text-xs text-[var(--muted)] mt-0.5 mb-4">
+          Patterns across industry segments — where risk is concentrated, not just where exposure sits
+        </p>
+
+        <ul className="flex flex-col gap-2 mb-5">
+          {sectorInsights.map((insight, idx) => (
+            <li key={idx} className="flex items-start gap-2 text-sm">
+              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--accent)] flex-shrink-0" />
+              <span>{insight}</span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-xs text-[var(--muted)] border-b border-[var(--border)]">
+                <th className="pb-2 pr-4">Industry</th>
+                <th className="pb-2 pr-4">Customers</th>
+                <th className="pb-2 pr-4">Avg Risk Score</th>
+                <th className="pb-2 pr-4">Green / Amber / Red</th>
+                <th className="pb-2 pr-4">Exposure</th>
+                <th className="pb-2">% of Portfolio Exposure</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sectors.map((s) => (
+                <tr key={s.industry} className="border-b border-[var(--border)] last:border-0">
+                  <td className="py-2 pr-4">{s.industry}</td>
+                  <td className="py-2 pr-4">{s.count}</td>
+                  <td className="py-2 pr-4">{s.avgRiskScore.toFixed(1)}</td>
+                  <td className="py-2 pr-4">
+                    <span className="text-[var(--risk-green)]">{s.greenCount}</span>
+                    {" / "}
+                    <span className="text-[var(--risk-amber)]">{s.amberCount}</span>
+                    {" / "}
+                    <span className="text-[var(--risk-red)]">{s.redCount}</span>
+                  </td>
+                  <td className="py-2 pr-4">{compactCurrency(s.exposure)}</td>
+                  <td className="py-2">{s.exposureSharePct.toFixed(1)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
