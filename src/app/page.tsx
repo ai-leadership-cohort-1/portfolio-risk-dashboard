@@ -149,14 +149,14 @@ export default function UploadPage() {
         <button
           onClick={handleRunAnalysis}
           disabled={!csvFile || isAnalysing}
-          className="rounded-md bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-md bg-[var(--button)] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--button-hover)] disabled:cursor-not-allowed disabled:opacity-40"
         >
           {isAnalysing ? "Analysing…" : "Run Analysis"}
         </button>
         <button
           onClick={handleLoadSampleData}
           disabled={isLoadingSample}
-          className="rounded-md border border-[var(--border)] bg-[var(--surface)] px-5 py-2.5 text-sm font-semibold text-[var(--foreground)] disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-md border border-[var(--button)] bg-[var(--surface)] px-5 py-2.5 text-sm font-semibold text-[var(--button)] transition-colors hover:bg-[var(--risk-green-bg)] disabled:cursor-not-allowed disabled:opacity-40"
         >
           {isLoadingSample ? "Loading…" : "Load Sample Data"}
         </button>

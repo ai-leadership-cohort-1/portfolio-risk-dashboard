@@ -95,7 +95,7 @@ export default function DashboardPage() {
         <p className="text-lg font-medium text-[var(--foreground)]">No analysis loaded yet</p>
         <Link
           href="/"
-          className="mt-4 rounded-md bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-white"
+          className="mt-4 rounded-md bg-[var(--button)] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--button-hover)]"
         >
           Go to Upload
         </Link>

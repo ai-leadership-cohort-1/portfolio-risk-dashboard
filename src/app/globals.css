@@ -14,6 +14,8 @@
   --risk-amber-bg: #fdf3e2;
   --risk-red: #b13030;
   --risk-red-bg: #fbeaea;
+  --button: #2f7d4f;
+  --button-hover: #24603c;
 }
 
 body {
