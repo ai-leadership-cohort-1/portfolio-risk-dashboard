@@ -22,6 +22,18 @@ After user has added their extension prompt or iterations, can you ask them if t
 
 Every time you run a command during your workflow, can you provide a high level description to an executive audience on what you are doing.
 
+Task list / progress language: when planning tasks from the starter prompt (and in any in-progress status updates), describe them as the actual features being built for the dashboard — e.g. "Build the risk scoring engine", "Build the executive dashboard (KPI cards, charts, top 10 risk table)", "Publish source code to GitHub" — not as internal implementation steps like "write all source files per design spec" or "read DESIGN_SPEC.md". Assume the audience is executive leadership, not a developer reading a build log.
+
+In the initial planning stage, can you make sure that the agent lists out these tasks:
+* Scaffold Next.js app + config files
+* Build risk scoring engine
+* Build Upload page and components
+* Build Executive Dashboard page
+* Copy sample data + write README
+* Install deps and verify build/dev server
+* Commit and push to GitHub
+* Verify Vercel deployment
+
 Access: 
 Don't ask the user for approvals during the first iteration/build run. Run completely automously. Once the app has had its initial deployment to Vercel then you can prompt the user for feedback as such:
 
