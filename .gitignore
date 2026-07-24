@@ -42,3 +42,4 @@ next-env.d.ts
 
 # local build/config (not part of the deployable app)
 config.txt
+.git-oldmount/
