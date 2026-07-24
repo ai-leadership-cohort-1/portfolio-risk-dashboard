@@ -1,5 +1,5 @@
 Tech stack: 
-Next.js (App Router, TypeScript) with Tailwind CSS. All logic runs client-side — no backend, no database, no external APIs, no authentication. Use the default Next.js build so it deploys to Vercel with zero configuration. Keep dependencies minimal.
+Next.js (App Router, TypeScript) with Tailwind CSS. All logic runs client-side — no backend, no database, no external APIs, no authentication. Use the default Next.js build so it deploys to Vercel with zero configuration. Keep dependencies minimal. Finish the build in 10-12 minutes.
 
 Build environment:
 This project folder is a synced/mounted folder, not a native local disk — npm install, npm run dev/build, and any node_modules churn can be unreliable here (rapid rename/delete operations can hit ENOTEMPTY and "Operation not permitted" errors, background/backgrounded processes can be left orphaned holding file locks, and in the worst case a bundler's use of mmap against node_modules/.next can crash outright with a SIGBUS "Bus error" on some mount implementations).
@@ -24,7 +24,7 @@ Every time you run a command during your workflow, can you provide a high level 
 
 Task list / progress language: when planning tasks from the starter prompt (and in any in-progress status updates), describe them as the actual features being built for the dashboard — e.g. "Build the risk scoring engine", "Build the executive dashboard (KPI cards, charts, top 10 risk table)", "Publish source code to GitHub" — not as internal implementation steps like "write all source files per design spec" or "read DESIGN_SPEC.md". Assume the audience is executive leadership, not a developer reading a build log.
 
-In the initial planning stage, can you make sure that the agent lists out these tasks:
+In the initial planning stage when the first prompt is inputed, can you make sure that the agent lists out these tasks as a baseline:
 * Scaffold Next.js app + config files
 * Build risk scoring engine
 * Build Upload page and components
@@ -33,6 +33,10 @@ In the initial planning stage, can you make sure that the agent lists out these 
 * Install deps and verify build/dev server
 * Commit and push to GitHub
 * Verify Vercel deployment
+
+If there are additional features in the starter prompt that are not listed above, add them to the appropriate slot.
+
+Complete the first task before moving onto the next. I want the user to be able to see all of the tasks being completed sequentially so that there is full visibility on each step of the build. Using subagents and multitasking is not ideal.
 
 Access: 
 Don't ask the user for approvals during the first iteration/build run. Run completely automously. Once the app has had its initial deployment to Vercel then you can prompt the user for feedback as such:
