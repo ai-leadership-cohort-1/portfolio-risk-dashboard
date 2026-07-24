@@ -22,8 +22,6 @@ import {
   summariseByIndustry,
   totalExposure,
   topRiskCustomers,
-  redRiskCustomers,
-  primaryRiskDriver,
   generatePortfolioTrend,
   recommendedActions,
 } from "@/lib/aggregations";
@@ -113,7 +111,6 @@ export default function DashboardPage() {
   const industryData = summariseByIndustry(customers);
   const total = totalExposure(customers);
   const top10 = topRiskCustomers(customers, 10);
-  const redCustomers = redRiskCustomers(customers);
   const trend = generatePortfolioTrend(customers);
   const actions = recommendedActions(customers);
 
@@ -291,78 +288,15 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Red high-risk customer detail */}
-      <div
-        className="mt-5 rounded-xl border-2 bg-[var(--surface)] p-5 shadow-sm"
-        style={{ borderColor: "var(--risk-red)" }}
-      >
-        <div className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "var(--risk-red)" }} />
-          <h3 className="text-base font-semibold">Red (High Risk) Customers — Full Detail</h3>
-        </div>
-        <p className="mt-1 text-sm" style={{ color: "var(--muted)" }}>
-          All {redCustomers.length} Red customer{redCustomers.length === 1 ? "" : "s"}, ranked highest risk score
-          to lowest. &quot;Primary risk driver&quot; is whichever weighted factor (credit history, repayment
-          behaviour, or exposure size) contributes most to that customer&apos;s score.
-        </p>
-        {redCustomers.length === 0 ? (
-          <p className="mt-3 text-sm" style={{ color: "var(--muted)" }}>
-            No customers currently fall into the Red category.
-          </p>
-        ) : (
-          <div className="mt-3 overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left" style={{ borderColor: "var(--border)" }}>
-                  <th className="py-2 pr-4 font-semibold">Rank</th>
-                  <th className="py-2 pr-4 font-semibold">Customer</th>
-                  <th className="py-2 pr-4 font-semibold">Industry</th>
-                  <th className="py-2 pr-4 font-semibold">Credit Score</th>
-                  <th className="py-2 pr-4 font-semibold">Repayment Status</th>
-                  <th className="py-2 pr-4 font-semibold">Loan Balance</th>
-                  <th className="py-2 pr-4 font-semibold">Risk Score</th>
-                  <th className="py-2 pr-4 font-semibold">Primary Risk Driver</th>
-                </tr>
-              </thead>
-              <tbody>
-                {redCustomers.map((c, idx) => (
-                  <tr
-                    key={c.customerId}
-                    className="border-b"
-                    style={{ borderColor: "var(--border)", backgroundColor: idx === 0 ? "var(--risk-red-bg)" : undefined }}
-                  >
-                    <td className="py-2 pr-4 font-bold" style={{ color: "var(--risk-red)" }}>
-                      {idx + 1}
-                    </td>
-                    <td className="py-2 pr-4 font-semibold">{c.customerName}</td>
-                    <td className="py-2 pr-4">{c.industrySector}</td>
-                    <td className="py-2 pr-4">{c.creditScore}</td>
-                    <td className="py-2 pr-4">{c.repaymentStatus}</td>
-                    <td className="py-2 pr-4 font-semibold">{formatCurrency(c.loanBalance)}</td>
-                    <td className="py-2 pr-4 font-bold" style={{ color: "var(--risk-red)" }}>
-                      {c.riskScore.toFixed(1)}
-                    </td>
-                    <td className="py-2 pr-4">{primaryRiskDriver(c)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
       {/* Bottom row */}
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <div className="rounded-xl border bg-[var(--surface)] p-5 shadow-sm" style={{ borderColor: "var(--border)" }}>
           <h3 className="text-sm font-semibold">Recommended Actions</h3>
-          <ul className="mt-3 space-y-3 text-sm">
+          <ul className="mt-3 space-y-2 text-sm">
             {actions.map((action, idx) => (
               <li key={idx} className="flex gap-2">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: "var(--accent)" }} />
-                <span>
-                  <span className="font-semibold">{action.title}.</span>{" "}
-                  <span style={{ color: "var(--muted)" }}>{action.detail}</span>
-                </span>
+                <span>{action}</span>
               </li>
             ))}
           </ul>
